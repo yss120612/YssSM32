@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YssSM32", "YssSM32\YssSM32.vcxproj", "{D2003BF0-DA64-4C9B-A956-0928562C3D55}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|VisualGDB = Debug|VisualGDB
+		Release|VisualGDB = Release|VisualGDB
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2003BF0-DA64-4C9B-A956-0928562C3D55}.Debug|VisualGDB.ActiveCfg = Debug|VisualGDB
+		{D2003BF0-DA64-4C9B-A956-0928562C3D55}.Debug|VisualGDB.Build.0 = Debug|VisualGDB
+		{D2003BF0-DA64-4C9B-A956-0928562C3D55}.Release|VisualGDB.ActiveCfg = Release|VisualGDB
+		{D2003BF0-DA64-4C9B-A956-0928562C3D55}.Release|VisualGDB.Build.0 = Release|VisualGDB
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C445EE26-56E5-4B81-A084-58B26347A474}
+	EndGlobalSection
+EndGlobal
