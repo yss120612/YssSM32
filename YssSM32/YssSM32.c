@@ -46,6 +46,9 @@ static void LED_Thread2(void const *argument);
   * @param  None
   * @retval None
   */
+
+static UART_HandleTypeDef s_UARTHandle;// = UART_HandleTypeDef();
+
 int main(void)
 {
   /* STM32F4xx HAL library initialization:
@@ -55,16 +58,73 @@ int main(void)
        - Global MSP (MCU Support Package) initialization
      */
 	HAL_Init();  
+	//__GPIOA_CLK_ENABLE();
 	
-	__GPIOD_CLK_ENABLE();
+	 RCC_OscInitTypeDef RCC_OscInitStruct;
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+	/**Initializes the CPU, AHB and APB busses clocks 
+	*/
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+	RCC_OscInitStruct.HSICalibrationValue = 16;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+	
+	HAL_RCC_OscConfig(&RCC_OscInitStruct);
+	
+
+	/**Initializes the CPU, AHB and APB busses clocks 
+	*/
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+	                            | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+//	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+	
+	
+	__GPIOC_CLK_ENABLE();
+	__USART1_CLK_ENABLE();
+	
 	GPIO_InitTypeDef GPIO_InitStructure;
+	 
+	GPIO_InitStructure.Pin = GPIO_PIN_13 | GPIO_PIN_14;
+		GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
+		GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
+		//GPIO_InitStructure.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(GPIOC, &GPIO_InitStructure);
+	
+	
+	
+	//GPIO_InitTypeDef GPIO_InitStructure;
+// 
+//	GPIO_InitStructure.Pin = GPIO_PIN_9;
+//	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+//	GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
+//	GPIO_InitStructure.Pull = GPIO_NOPULL;
+//	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+//    
+//	GPIO_InitStructure.Pin = GPIO_PIN_10;
+//	GPIO_InitStructure.Mode = GPIO_MODE_AF_OD;
+//	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+	
+	s_UARTHandle.Instance        = USART1;
+	s_UARTHandle.Init.BaudRate   = 115200;
+	s_UARTHandle.Init.WordLength = UART_WORDLENGTH_8B;
+	s_UARTHandle.Init.StopBits   = UART_STOPBITS_1;
+	s_UARTHandle.Init.Parity     = UART_PARITY_NONE;
+	s_UARTHandle.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
+	s_UARTHandle.Init.Mode       = UART_MODE_TX_RX;
+	s_UARTHandle.Init.OverSampling = UART_OVERSAMPLING_16;
 
-	GPIO_InitStructure.Pin = GPIO_PIN_12 | GPIO_PIN_13;
+	if (HAL_UART_Init(&s_UARTHandle) != HAL_OK)
+		asm("bkpt 255");
+	
+	
 
-	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
-	GPIO_InitStructure.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOD, &GPIO_InitStructure);
 
 	/* Thread 1 definition */
 	osThreadDef(LED1, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
@@ -100,17 +160,40 @@ void SysTick_Handler(void)
 static void LED_Thread1(void const *argument)
 {
 	(void) argument;
-  
+	uint8_t t2enable = 0;
 	for (;;)
 	{
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
-		osDelay(2000);
+		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, GPIO_PIN_SET);
+		//osDelay(2000);
 		
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
-		osThreadSuspend(LEDThread2Handle);
-		osDelay(2000);
+		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, GPIO_PIN_RESET);
+//		osDelay(2000);
+//		if (t2enable == 0)
+//		{
+//			osThreadResume(LEDThread2Handle);
+//			t2enable = 1;
+//		}
+//		else
+//		{
+//			osThreadSuspend(LEDThread2Handle);	
+//			t2enable = 0;
+//		}
+		vTaskDelay(1000);
 		
-		osThreadResume(LEDThread2Handle);
+		if (t2enable == 0)
+		{
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_RESET);
+			osThreadResume(LEDThread2Handle);
+			t2enable = 1;
+		}
+		else
+		{
+			osThreadSuspend(LEDThread2Handle);	
+			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET);
+			t2enable = 0;
+		}
+		
+		
 	}
 }
 
@@ -123,13 +206,17 @@ static void LED_Thread2(void const *argument)
 {
 	uint32_t count;
 	(void) argument;
-  
+	uint8_t c_collback[] = "CollBack  \r";
 	for (;;)
 	{
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-		osDelay(200);
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+		//osDelay(50);
+		vTaskDelay(50);
+		HAL_UART_Transmit(&s_UARTHandle,c_collback,sizeof(c_collback)-1, HAL_MAX_DELAY);
 	}
 }
+
+
 
 #ifdef  USE_FULL_ASSERT
 /**
