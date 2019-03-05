@@ -88,6 +88,8 @@ int main(void)
 	__GPIOC_CLK_ENABLE();
 	__USART1_CLK_ENABLE();
 	
+	__AFIO_CLK_ENABLE();
+	
 	GPIO_InitTypeDef GPIO_InitStructure;
 	 
 	GPIO_InitStructure.Pin = GPIO_PIN_13 | GPIO_PIN_14;
@@ -100,15 +102,18 @@ int main(void)
 	
 	//GPIO_InitTypeDef GPIO_InitStructure;
 // 
-//	GPIO_InitStructure.Pin = GPIO_PIN_9;
-//	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
-//	GPIO_InitStructure.Speed = GPIO_SPEED_HIGH;
-//	GPIO_InitStructure.Pull = GPIO_NOPULL;
-//	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_InitStructure.Pin = GPIO_PIN_9;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Speed = GPIO_SPEED_MEDIUM;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 //    
-//	GPIO_InitStructure.Pin = GPIO_PIN_10;
-//	GPIO_InitStructure.Mode = GPIO_MODE_AF_OD;
-//	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_InitStructure.Pin = GPIO_PIN_10;
+	GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	
+	
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
 	
 	s_UARTHandle.Instance        = USART1;
